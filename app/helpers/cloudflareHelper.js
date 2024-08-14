@@ -20,3 +20,32 @@ exports.listDnsRecords = async (zoneId) => {
     throw error;
   }
 };
+
+exports.addDnsRecord = async (zoneId, content, name, type, id) => {
+  try {
+    const response = await axios({
+      method: 'post',
+      url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`,
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+      },
+      data: {
+        content: content,
+        name: name,
+        type: type,
+        id: id,
+        comment: 'Added by Cloudflare API',
+        proxied: true,
+      },
+    });
+
+    if (response.status >= 400 || response.data.success === false) {
+      throw new Error(response.data.errors ? response.data.errors[0].message : 'Unknown error');
+    }
+
+    return response.data.result;
+  } catch (error) {
+    console.error('Error in addDnsRecord:', error.message || error);
+    throw error; // Throw error untuk ditangkap di luar fungsi
+  }
+};

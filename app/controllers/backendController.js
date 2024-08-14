@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const cloudflareHelper = require('../helpers/cloudflareHelper');
+const cuid = require('cuid');
 
 function isPublicIP(ip) {
   const ipv4Regex =
@@ -171,13 +172,30 @@ exports.create = async (req, res) => {
         message: 'Subdomain already exists.',
       });
     }
+
+    recordId = cuid();
+    const cloudFlare = await cloudflareHelper.addDnsRecord(
+      domainExists.zoneId,
+      content,
+      name,
+      type,
+      recordId
+    );
+    if (cloudFlare.errors) {
+      return res.status(400).json({
+        success: false,
+        message: cloudFlare.errors[0].message,
+      });
+    }
+
     const securityCode = generateRandomSecurityCode();
     const newSubdomain = await prisma.Subdomain.create({
       data: {
-        name: name,
+        id: cloudFlare.id,
+        name: cloudFlare.name,
         domainId: domainExists.id,
-        content: content,
-        type: type,
+        content: cloudFlare.content,
+        type: cloudFlare.type,
         securityCode: securityCode,
       },
     });
