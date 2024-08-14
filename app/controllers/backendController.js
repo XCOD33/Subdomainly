@@ -49,12 +49,12 @@ exports.search = async (req, res) => {
       });
     }
 
-    const nameRegex = /^[A-z0-9]+$/;
+    const nameRegex = /^(?!-)[a-z0-9-]+(?<!-)$/;
 
     if (!nameRegex.test(name)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid name format. Only lowercase a-z and 0-9 are allowed.',
+        message: 'Invalid name format. Only lowercase a-z, 0-9, and hyphen are allowed.',
       });
     }
 
@@ -79,12 +79,14 @@ exports.search = async (req, res) => {
         results.push({
           domain: domain.domain,
           subdomain: name,
+          longName: `${name}.${domain.domain}`,
           status: 'taken',
         });
       } else {
         results.push({
           domain: domain.domain,
           subdomain: name,
+          longName: `${name}.${domain.domain}`,
           status: 'available',
         });
       }
@@ -115,11 +117,11 @@ exports.create = async (req, res) => {
       });
     }
 
-    const nameRegex = /^[A-z0-9]+$/;
+    const nameRegex = /^(?!-)[a-z0-9-]+(?<!-)$/;
     if (!nameRegex.test(name)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid name format. Only lowercase a-z and 0-9 are allowed.',
+        message: 'Invalid name format. Only lowercase a-z, 0-9, and hyphen are allowed.',
       });
     }
     if (name.length > 256) {
