@@ -16,6 +16,7 @@ datasource db {
 model Domain {
   id        String   @id @default(cuid())
   domain    String
+  zoneId    String
   created   DateTime @default(now())
   updated   DateTime @default(now())
   Subdomain Subdomain[]

@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const cloudflareHelper = require('../helpers/cloudflareHelper');
 
 function isPublicIP(ip) {
   const ipv4Regex =
@@ -195,12 +196,12 @@ exports.create = async (req, res) => {
 
 exports.addDomain = async (req, res) => {
   try {
-    const { domain } = req.body;
+    const { domain, zoneId } = req.body;
 
-    if (!domain) {
+    if (!domain || !zoneId) {
       return res.status(400).json({
         success: false,
-        message: 'Domain is required.',
+        message: 'Domain and zoneId is required.',
       });
     }
 
@@ -217,17 +218,44 @@ exports.addDomain = async (req, res) => {
       });
     }
 
-    const newDomain = await prisma.Domain.create({
-      data: {
-        domain,
-      },
-    });
+    const listDnsRecords = await cloudflareHelper.listDnsRecords(zoneId);
+    if (listDnsRecords.length < 0) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch DNS records.',
+      });
+    } else if (listDnsRecords.length > 0) {
+      is_correct_zone = false;
+      for (const record of listDnsRecords) {
+        if (record.zone_name === domain) {
+          is_correct_zone = true;
+        }
+      }
+      if (is_correct_zone) {
+        const newDomain = await prisma.Domain.create({
+          data: {
+            domain,
+            zoneId,
+          },
+        });
 
-    return res.status(201).json({
-      success: true,
-      message: 'Domain created.',
-      data: newDomain,
-    });
+        return res.status(201).json({
+          success: true,
+          message: 'Domain created.',
+          data: newDomain,
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Domain not found in the specified zone.',
+        });
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'ZoneId is invalid.',
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({
