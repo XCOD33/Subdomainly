@@ -341,6 +341,81 @@ exports.update = async (req, res) => {
   }
 };
 
+exports.delete = async (req, res) => {
+  try {
+    const { prevSubdomain, securityCode } = req.body;
+    if (!prevSubdomain || !securityCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'prevSubdomain and securityCode are required.',
+      });
+    }
+
+    const domainRegex = /^(?!-)([a-z0-9-]+(?<!-)\.)*([a-z0-9-]+\.[a-z]{2,})$/;
+    const match = prevSubdomain.match(domainRegex);
+    let subdomain = null;
+    let domain = null;
+    if (match) {
+      subdomain = match[1] ? match[1].slice(0, -1) : '';
+      domain = match[2];
+    } else {
+      throw new Error('Invalid domain format.');
+    }
+
+    const domainExists = await prisma.Domain.findFirst({
+      where: {
+        domain: domain,
+      },
+    });
+    if (!domainExists) {
+      return res.status(404).json({
+        success: false,
+        message: 'Domain not found.',
+      });
+    }
+    const subdomainExist = await prisma.Subdomain.findFirst({
+      where: {
+        domainId: domainExists.id,
+        name: `${subdomain}.${domain}`,
+        securityCode: securityCode,
+      },
+    });
+    if (!subdomainExist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subdomain not found or invalid security code.',
+      });
+    }
+
+    const cloudFlare = await cloudflareHelper.deleteDnsRecord(
+      domainExists.zoneId,
+      subdomainExist.id
+    );
+    if (cloudFlare.errors) {
+      return res.status(400).json({
+        success: false,
+        message: cloudFlare.errors[0].message,
+      });
+    }
+    await prisma.Subdomain.delete({
+      where: {
+        id: subdomainExist.id,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Subdomain deleted.',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
 exports.addDomain = async (req, res) => {
   try {
     const { domain, zoneId } = req.body;

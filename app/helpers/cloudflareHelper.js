@@ -78,3 +78,24 @@ exports.updateDnsRecord = async (zoneId, content = null, name = null, type = nul
     throw error;
   }
 };
+
+exports.deleteDnsRecord = async (zoneId, id) => {
+  try {
+    const response = await axios({
+      method: 'delete',
+      url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records/${id}`,
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+      },
+    });
+
+    if (response.status >= 400 || response.data.success === false) {
+      throw new Error(response.data.errors ? response.data.errors[0].message : 'Unknown error');
+    }
+
+    return response.data.result;
+  } catch (error) {
+    console.error('Error in deleteDnsRecord:', error.message || error);
+    throw error;
+  }
+};
