@@ -214,6 +214,133 @@ exports.create = async (req, res) => {
   }
 };
 
+exports.update = async (req, res) => {
+  try {
+    const { prevSubdomain, name, content, type, securityCode } = req.body;
+    if (!prevSubdomain || !securityCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'prevSubdomain and securityCode are required.',
+      });
+    }
+
+    let newName = null;
+    if (name) {
+      const nameRegex = /^(?!-)[a-z0-9-]+(?<!-)$/;
+      if (!nameRegex.test(name)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid name format. Only lowercase a-z, 0-9, and hyphen are allowed.',
+        });
+      }
+      if (name.length > 256) {
+        return res.status(400).json({
+          success: false,
+          message: 'Subdomain too long.',
+        });
+      }
+      newName = name;
+    }
+    let newContent = null;
+    if (content) {
+      if (!isPublicIP(content)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Content must be a valid IP address.',
+        });
+      }
+      newContent = content;
+    }
+    let newType = null;
+    if (type) {
+      if (type !== 'A' && type !== 'AAAA' && type !== 'CNAME') {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid type. Only A, AAAA, and CNAME are allowed.',
+        });
+      }
+      newType = type;
+    }
+
+    const domainRegex = /^(?!-)([a-z0-9-]+(?<!-)\.)*([a-z0-9-]+\.[a-z]{2,})$/;
+    const match = prevSubdomain.match(domainRegex);
+    let subdomain = null;
+    let domain = null;
+    if (match) {
+      subdomain = match[1] ? match[1].slice(0, -1) : '';
+      domain = match[2];
+    } else {
+      throw new Error('Invalid domain format.');
+    }
+    console.log(subdomain, domain);
+
+    const domainExists = await prisma.Domain.findFirst({
+      where: {
+        domain: domain,
+      },
+    });
+    if (!domainExists) {
+      return res.status(404).json({
+        success: false,
+        message: 'Domain not found.',
+      });
+    }
+    const subdomainExist = await prisma.Subdomain.findFirst({
+      where: {
+        domainId: domainExists.id,
+        name: `${subdomain}.${domain}`,
+        securityCode: securityCode,
+      },
+    });
+    if (!subdomainExist) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subdomain not found or invalid security code.',
+      });
+    }
+
+    const cloudFlare = await cloudflareHelper.updateDnsRecord(
+      domainExists.zoneId,
+      newContent,
+      newName,
+      newType,
+      subdomainExist.id
+    );
+    if (cloudFlare.errors) {
+      return res.status(400).json({
+        success: false,
+        message: cloudFlare.errors[0].message,
+      });
+    }
+    const newSubdomain = await prisma.Subdomain.update({
+      where: {
+        id: subdomainExist.id,
+      },
+      data: {
+        name: newName ? cloudFlare.name : `${subdomain}.${domain}`,
+        content: newContent ? cloudFlare.content : subdomainExist.content,
+        type: newType ? cloudFlare.type : subdomainExist.type,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Subdomain updated.',
+      data: {
+        name: newSubdomain.name,
+        content: newSubdomain.content,
+        type: newSubdomain.type,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
 exports.addDomain = async (req, res) => {
   try {
     const { domain, zoneId } = req.body;
