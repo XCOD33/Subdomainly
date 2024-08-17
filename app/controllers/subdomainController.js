@@ -1,6 +1,7 @@
 const prisma = require('../models/subdomain');
 const jwt = require('jsonwebtoken');
 const cloudflareHelper = require('../helpers/cloudflareHelper');
+const fonnteHelper = require('../helpers/fonnteHelper');
 
 exports.search = async (req, res) => {
   try {
@@ -155,11 +156,20 @@ exports.report = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRATION }
     );
 
-    console.log(`Subdomain ${subdomain.name} reported: ${reason} - Secret: ${secret}`);
+    try {
+      const message = `Subdomain ${subdomain.name} (${subdomain.domain.domain}) reported: ${reason}. Delete: ${process.env.BASE_URL}/api/subdomain/delete-with-secret?secret=${secret}`;
+      await fonnteHelper.sendMessage(message);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: `Subdomain reported successfully, but failed to send notification: ${error.message}`,
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Subdomain reported successfully.',
+      message: 'Subdomain reported successfully and notification sent.',
     });
   } catch (error) {
     console.error(error);
@@ -172,7 +182,7 @@ exports.report = async (req, res) => {
 
 exports.deleteWithSecret = async (req, res) => {
   try {
-    const { secret } = req.body;
+    const { secret } = req.query;
     if (!secret) {
       return res.status(400).json({
         success: false,

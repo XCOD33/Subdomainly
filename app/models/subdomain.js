@@ -183,6 +183,9 @@ exports.deleteSubdomain = async (prevSubdomain, securityCode) => {
 exports.getSubdomainById = async (id) => {
   return prisma.Subdomain.findUnique({
     where: { id },
+    include: {
+      domain: true,
+    },
   });
 };
 

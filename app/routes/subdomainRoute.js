@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const subdomainController = require('../controllers/subdomainController');
 const validateRequest = require('../middleware/validateRequest');
+const validateRequestParam = require('../middleware/validateRequestParam');
 const {
   searchSubdomainSchema,
   createSubdomainSchema,
@@ -13,9 +14,9 @@ const {
 
 router.get('/list', subdomainController.list);
 router.post('/report', validateRequest(reportSubdomainSchema), subdomainController.report);
-router.delete(
+router.get(
   '/delete-with-secret',
-  validateRequest(deleteSubdomainWithSecretSchema),
+  validateRequestParam(deleteSubdomainWithSecretSchema),
   subdomainController.deleteWithSecret
 );
 
