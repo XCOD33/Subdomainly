@@ -25,7 +25,7 @@ model Domain {
 model Subdomain {
   id        String   @id @default(cuid())
   domain    Domain    @relation(fields: [domainId], references: [id])
-  domainId  String @unique
+  domainId  String
   type      String
   name      String
   content   String

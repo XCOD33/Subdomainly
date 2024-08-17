@@ -18,6 +18,40 @@ exports.search = async (req, res) => {
   }
 };
 
+exports.listSubdomains = async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const limit = 15;
+    const offset = (page - 1) * limit;
+
+    const totalSubdomains = await prisma.countSubdomains();
+    const subdomains = await prisma.listSubdomains(limit, offset);
+
+    const results = subdomains.map((subdomain) => ({
+      id: subdomain.id,
+      name: subdomain.name,
+      domain: subdomain.domain.name,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: 'List of subdomains fetched successfully.',
+      data: results,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalSubdomains / limit),
+        totalItems: totalSubdomains,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const { domain, name, content, type } = req.body;

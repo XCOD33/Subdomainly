@@ -23,6 +23,20 @@ exports.searchSubdomains = async (name) => {
   );
 };
 
+exports.countSubdomains = async () => {
+  return prisma.Subdomain.count();
+};
+
+exports.listSubdomains = async (limit, offset) => {
+  return prisma.Subdomain.findMany({
+    skip: offset,
+    take: limit,
+    include: {
+      domain: true,
+    },
+  });
+};
+
 exports.createSubdomain = async (domain, name, content, type) => {
   const domainExists = await prisma.Domain.findFirst({ where: { domain } });
   if (!domainExists) {

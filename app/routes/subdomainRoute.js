@@ -9,6 +9,8 @@ const {
   deleteSubdomainSchema,
 } = require('../validators/subdomainValidator');
 
+router.get('/list', subdomainController.listSubdomains);
+
 router.post('/search', validateRequest(searchSubdomainSchema), subdomainController.search);
 router.post('/create', validateRequest(createSubdomainSchema), subdomainController.create);
 router.put('/update', validateRequest(updateSubdomainSchema), subdomainController.update);
