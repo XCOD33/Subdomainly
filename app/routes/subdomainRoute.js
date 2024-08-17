@@ -7,9 +7,17 @@ const {
   createSubdomainSchema,
   updateSubdomainSchema,
   deleteSubdomainSchema,
+  reportSubdomainSchema,
+  deleteSubdomainWithSecretSchema,
 } = require('../validators/subdomainValidator');
 
-router.get('/list', subdomainController.listSubdomains);
+router.get('/list', subdomainController.list);
+router.post('/report', validateRequest(reportSubdomainSchema), subdomainController.report);
+router.delete(
+  '/delete-with-secret',
+  validateRequest(deleteSubdomainWithSecretSchema),
+  subdomainController.deleteWithSecret
+);
 
 router.post('/search', validateRequest(searchSubdomainSchema), subdomainController.search);
 router.post('/create', validateRequest(createSubdomainSchema), subdomainController.create);

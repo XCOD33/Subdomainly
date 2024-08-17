@@ -34,6 +34,9 @@ exports.listSubdomains = async (limit, offset) => {
     include: {
       domain: true,
     },
+    orderBy: {
+      created: 'desc',
+    },
   });
 };
 
@@ -175,4 +178,28 @@ exports.deleteSubdomain = async (prevSubdomain, securityCode) => {
   });
 
   return { success: true };
+};
+
+exports.getSubdomainById = async (id) => {
+  return prisma.Subdomain.findUnique({
+    where: { id },
+  });
+};
+
+exports.getSubdomainByIdAndSecurityCode = async (id, securityCode) => {
+  return prisma.Subdomain.findFirst({
+    where: {
+      id,
+      securityCode,
+    },
+    include: {
+      domain: true,
+    },
+  });
+};
+
+exports.deleteSubdomainById = async (id) => {
+  return prisma.Subdomain.delete({
+    where: { id },
+  });
 };

@@ -73,9 +73,30 @@ const deleteSubdomainSchema = Joi.object({
   securityCode: Joi.string().required(),
 });
 
+const reportSubdomainSchema = Joi.object({
+  id: Joi.string().required().messages({
+    'string.empty': 'Subdomain ID is required.',
+    'any.required': 'Subdomain ID is required.',
+  }),
+  reason: Joi.string().required().max(255).messages({
+    'string.empty': 'Reason is required.',
+    'any.required': 'Reason is required.',
+    'string.max': 'Reason should not exceed 255 characters.',
+  }),
+});
+
+const deleteSubdomainWithSecretSchema = Joi.object({
+  secret: Joi.string().required().messages({
+    'string.empty': 'Secret is required.',
+    'any.required': 'Secret is required.',
+  }),
+});
+
 module.exports = {
   searchSubdomainSchema,
   createSubdomainSchema,
   updateSubdomainSchema,
   deleteSubdomainSchema,
+  reportSubdomainSchema,
+  deleteSubdomainWithSecretSchema,
 };

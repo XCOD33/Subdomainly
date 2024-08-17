@@ -1,4 +1,6 @@
 const prisma = require('../models/subdomain');
+const jwt = require('jsonwebtoken');
+const cloudflareHelper = require('../helpers/cloudflareHelper');
 
 exports.search = async (req, res) => {
   try {
@@ -18,7 +20,7 @@ exports.search = async (req, res) => {
   }
 };
 
-exports.listSubdomains = async (req, res) => {
+exports.list = async (req, res) => {
   try {
     const { page = 1 } = req.query;
     const limit = 15;
@@ -30,7 +32,7 @@ exports.listSubdomains = async (req, res) => {
     const results = subdomains.map((subdomain) => ({
       id: subdomain.id,
       name: subdomain.name,
-      domain: subdomain.domain.name,
+      domain: subdomain.domain.domain,
     }));
 
     return res.status(200).json({
@@ -123,6 +125,98 @@ exports.delete = async (req, res) => {
         message: deletionResult.message,
       });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
+exports.report = async (req, res) => {
+  try {
+    const { id, reason } = req.body;
+
+    const subdomain = await prisma.getSubdomainById(id);
+    if (!subdomain) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subdomain not found.',
+      });
+    }
+
+    const secret = jwt.sign(
+      {
+        id: subdomain.id,
+        securityCode: subdomain.securityCode,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRATION }
+    );
+
+    console.log(`Subdomain ${subdomain.name} reported: ${reason} - Secret: ${secret}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Subdomain reported successfully.',
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`,
+    });
+  }
+};
+
+exports.deleteWithSecret = async (req, res) => {
+  try {
+    const { secret } = req.body;
+    if (!secret) {
+      return res.status(400).json({
+        success: false,
+        message: 'Secret is required.',
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(secret, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired secret.',
+      });
+    }
+
+    const { id, securityCode } = decoded;
+
+    const subdomain = await prisma.getSubdomainByIdAndSecurityCode(id, securityCode);
+    if (!subdomain) {
+      return res.status(404).json({
+        success: false,
+        message: 'Subdomain not found or invalid security code.',
+      });
+    }
+
+    const cloudFlare = await cloudflareHelper.deleteDnsRecord(
+      subdomain.domain.zoneId,
+      subdomain.id
+    );
+    if (cloudFlare.errors) {
+      return res.status(400).json({
+        success: false,
+        message: cloudFlare.errors[0].message,
+      });
+    }
+
+    await prisma.deleteSubdomainById(subdomain.id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Subdomain deleted successfully.',
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
