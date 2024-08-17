@@ -150,7 +150,6 @@ exports.report = async (req, res) => {
     const secret = jwt.sign(
       {
         id: subdomain.id,
-        securityCode: subdomain.securityCode,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRATION }
@@ -200,9 +199,9 @@ exports.deleteWithSecret = async (req, res) => {
       });
     }
 
-    const { id, securityCode } = decoded;
+    const { id } = decoded;
 
-    const subdomain = await prisma.getSubdomainByIdAndSecurityCode(id, securityCode);
+    const subdomain = await prisma.getSubdomainById(id);
     if (!subdomain) {
       return res.status(404).json({
         success: false,

@@ -189,18 +189,6 @@ exports.getSubdomainById = async (id) => {
   });
 };
 
-exports.getSubdomainByIdAndSecurityCode = async (id, securityCode) => {
-  return prisma.Subdomain.findFirst({
-    where: {
-      id,
-      securityCode,
-    },
-    include: {
-      domain: true,
-    },
-  });
-};
-
 exports.deleteSubdomainById = async (id) => {
   return prisma.Subdomain.delete({
     where: { id },
