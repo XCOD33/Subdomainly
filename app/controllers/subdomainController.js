@@ -1,6 +1,4 @@
 const prisma = require('../models/subdomain');
-const cloudflareHelper = require('../helpers/cloudflareHelper');
-const { generateRandomSecurityCode } = require('../helpers/utilities');
 
 exports.search = async (req, res) => {
   try {

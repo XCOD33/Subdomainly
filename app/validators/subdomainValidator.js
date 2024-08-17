@@ -1,12 +1,38 @@
 const Joi = require('joi');
+const fs = require('fs');
+const path = require('path');
 const { isPublicIP } = require('../helpers/utilities');
+
+const blockedSubdomainPath = path.join(__dirname, '../../config/blockedSubdomains.json');
+const blockedSubdomains = JSON.parse(
+  fs.readFileSync(blockedSubdomainPath, 'utf-8')
+).blocked_subdomains;
+
+const searchSubdomainSchema = Joi.object({
+  name: Joi.string()
+    .pattern(/^(?!-)[a-z0-9-]+(?<!-)$/)
+    .max(256)
+    .required()
+    .custom((value, helpers) => {
+      if (blockedSubdomains.includes(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    }),
+});
 
 const createSubdomainSchema = Joi.object({
   domain: Joi.string().required(),
   name: Joi.string()
     .pattern(/^(?!-)[a-z0-9-]+(?<!-)$/)
     .max(256)
-    .required(),
+    .required()
+    .custom((value, helpers) => {
+      if (blockedSubdomains.includes(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    }),
   content: Joi.string()
     .custom((value, helpers) => {
       if (!isPublicIP(value)) {
@@ -23,7 +49,13 @@ const updateSubdomainSchema = Joi.object({
   name: Joi.string()
     .pattern(/^(?!-)[a-z0-9-]+(?<!-)$/)
     .max(256)
-    .optional(),
+    .optional()
+    .custom((value, helpers) => {
+      if (blockedSubdomains.includes(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    }),
   content: Joi.string()
     .optional()
     .custom((value, helpers) => {
@@ -42,6 +74,7 @@ const deleteSubdomainSchema = Joi.object({
 });
 
 module.exports = {
+  searchSubdomainSchema,
   createSubdomainSchema,
   updateSubdomainSchema,
   deleteSubdomainSchema,

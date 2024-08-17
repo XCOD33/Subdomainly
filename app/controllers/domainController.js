@@ -1,5 +1,4 @@
 const prisma = require('../models/domain');
-const cloudflareHelper = require('../helpers/cloudflareHelper');
 
 exports.addDomain = async (req, res) => {
   try {
