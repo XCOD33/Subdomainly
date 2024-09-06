@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    ports:
+      - '3000:3000'
+    links:
+      - db
+    volumes:
+      - .:/app
+    environment:
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=playa-epidural-artist-yucca-gurgle-gaining-aides-wires
+      - DB_NAME=free-subdomain
+      - DATABASE_URL=postgres://postgres:playa-epidural-artist-yucca-gurgle-gaining-aides-wires@db:5432/free-subdomain
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: playa-epidural-artist-yucca-gurgle-gaining-aides-wires
+      POSTGRES_DB: free-subdomain
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'

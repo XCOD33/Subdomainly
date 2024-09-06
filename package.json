@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "@prisma/client": "^5.18.0",
     "axios": "^1.7.3",
     "cuid": "^3.0.0",
