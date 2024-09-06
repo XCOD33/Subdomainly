@@ -9,6 +9,7 @@ services:
       - db
     volumes:
       - .:/app
+      - /app/node_modules
     environment:
       - DB_PORT=5432
       - DB_USER=postgres
