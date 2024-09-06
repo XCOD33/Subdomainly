@@ -1,22 +1,26 @@
-# tahap pertama: build
-FROM node:18-alpine
+# build image
+FROM node:18-alpine as builder
 
-# direktori kerja
 WORKDIR /app
 
-# copy package.json dan instal dependensi
 COPY package*.json ./
-RUN npm install
+RUN npm ci --quiet
 
-# copy semua file aplikasi
+COPY ./prisma /prisma
+
 COPY . .
 
-# Copy file startup.sh ke dalam container dan beri hak eksekusi
-COPY startup.sh /app/startup.sh
-RUN chmod +x /app/startup.sh
+# production image
+FROM node:18-alpine
+WORKDIR /app
+ENV NODE_ENV production
 
-# port aplikasi
+RUN npm ci --only=production --quiet
+
+COPY --chown=node:node --from=builder /app/prisma /app/prisma
+
+USER node
+
 EXPOSE 3000
 
-# jalankan aplikasi
-CMD [".startup.sh"]
+CMD ["node", "server.js"]
