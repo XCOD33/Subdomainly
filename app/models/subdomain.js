@@ -10,7 +10,7 @@ exports.searchSubdomains = async (name) => {
       const subdomain = await prisma.Subdomain.findFirst({
         where: {
           domainId: domain.id,
-          name: name,
+          name: `${name}.${domain.domain}`,
         },
       });
       return {
