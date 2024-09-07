@@ -6,8 +6,13 @@ const cors = require('cors');
 
 const app = express();
 
+const corsOptions = {
+  origin: 'https://api.subdomain.com',
+  methods: 'GET,PUT,POST,DELETE',
+};
+
 // middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
