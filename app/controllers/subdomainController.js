@@ -41,7 +41,7 @@ exports.search = async (req, res) => {
 exports.list = async (req, res) => {
   try {
     const { page = 1 } = req.query;
-    const limit = 15;
+    const limit = 4;
     const offset = (page - 1) * limit;
 
     const totalSubdomains = await prisma.countSubdomains();
