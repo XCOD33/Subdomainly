@@ -7,7 +7,7 @@ const cors = require('cors');
 const app = express();
 
 const corsOptions = {
-  origin: 'https://api.subdomain.com',
+  origin: 'https://subdomainly.com',
   methods: 'GET,PUT,POST,DELETE',
 };
 
