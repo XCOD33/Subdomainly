@@ -3,8 +3,6 @@ version: '3'
 services:
   web:
     build: .
-    ports:
-      - '3000:3000'
     links:
       - db
     volumes:
@@ -21,6 +19,8 @@ services:
     depends_on:
       - db
     restart: always
+    networks:
+      - nginx-proxy-manager_proxy_network
 
   db:
     image: postgres:latest
@@ -30,5 +30,11 @@ services:
       POSTGRES_DB: free-subdomain
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
+    expose:
+      - '5432'
+    networks:
+      - nginx-proxy-manager_proxy_network
+
+networks:
+  nginx-proxy-manager_proxy_network:
+    external: true
