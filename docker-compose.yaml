@@ -16,13 +16,6 @@ services:
       - DB_USER=postgres
       - DB_PASS=playa-epidural-artist-yucca-gurgle-gaining-aides-wires
       - DB_NAME=free-subdomain
-      - DATABASE_URL=postgres://postgres:playa-epidural-artist-yucca-gurgle-gaining-aides-wires@db:5432/free-subdomain
-      - CLOUDFLARE_API_TOKEN=_0ReSe2FuqgOdQKhh1ArIArkxZSb70K7-pFW7Feh
-      - CLOUDFLARE_ACC_ID=_0ReSe2FuqgOdQKhh1ArIArkxZSb70K7-pFW7Feh
-      - JWT_SECRET=f264ea7c8f4702b786d140ff8852c411a79aa2e4d6779d865cfee6c98d82d037
-      - JWT_EXPIRATION=14d
-      - FONNTE_TARGET=081225585306
-      - FONNTE_TOKEN=vUNKUxRjC_+gP7szRTZm
     env_file:
       - .env
     depends_on:
