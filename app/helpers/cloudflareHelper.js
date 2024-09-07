@@ -28,6 +28,7 @@ exports.addDnsRecord = async (zoneId, content, name, type, id) => {
       url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`,
       headers: {
         Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       data: {
         content: content,
