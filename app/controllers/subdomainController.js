@@ -2,10 +2,17 @@ const prisma = require('../models/subdomain');
 const jwt = require('jsonwebtoken');
 const cloudflareHelper = require('../helpers/cloudflareHelper');
 const fonnteHelper = require('../helpers/fonnteHelper');
+const geminiHelper = require('../helpers/geminiHelper');
 
 exports.search = async (req, res) => {
   try {
     const { name, turnstile } = req.body;
+
+    const isSafeSubdomain = await geminiHelper.isSafeSubdomain(name);
+    console.log(isSafeSubdomain);
+    if (isSafeSubdomain.status !== 'SAFE') {
+      throw new Error(`${isSafeSubdomain.reason}`);
+    }
 
     const isValid = await cloudflareHelper.validateTurnstileToken(turnstile);
 
@@ -203,6 +210,7 @@ exports.deleteWithSecret = async (req, res) => {
     try {
       decoded = jwt.verify(secret, process.env.JWT_SECRET);
     } catch (error) {
+      console.error(error);
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired secret.',

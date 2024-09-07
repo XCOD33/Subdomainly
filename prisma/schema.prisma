@@ -33,3 +33,9 @@ model Subdomain {
   created   DateTime @default(now())
   updated   DateTime @default(now())
 }
+
+model BlockedName {
+  id        String   @id @default(cuid())
+  name      String  @unique
+  reason    String  @default("No reason provided")
+}
