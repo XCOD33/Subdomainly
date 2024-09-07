@@ -99,3 +99,27 @@ exports.deleteDnsRecord = async (zoneId, id) => {
     throw error;
   }
 };
+
+exports.validateTurnstileToken = async (token) => {
+  const secretKey =
+    process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+  const verificationUrl = `https://challenges.cloudflare.com/turnstile/v0/siteverify`;
+
+  try {
+    const response = await axios.post(verificationUrl, {
+      response: token,
+      secret: secretKey,
+    });
+
+    if (!response.data.success) {
+      const errorCodes = response.data['error-codes'] || [];
+      const errorMessage = errorCodes.length > 0 ? errorCodes.join(', ') : 'Unknown error';
+      throw new Error(`${errorMessage}`);
+    }
+
+    return response.data.success;
+  } catch (error) {
+    console.error('Error in validateTurnstileToken:', error.message || error);
+    throw error;
+  }
+};

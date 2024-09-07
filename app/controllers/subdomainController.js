@@ -5,7 +5,17 @@ const fonnteHelper = require('../helpers/fonnteHelper');
 
 exports.search = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, turnstile } = req.body;
+
+    const isValid = await cloudflareHelper.validateTurnstileToken(turnstile);
+
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Turnstile verification failed.',
+      });
+    }
+
     const results = await prisma.searchSubdomains(name);
     res.status(200).json({
       success: true,

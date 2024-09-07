@@ -19,6 +19,7 @@ const searchSubdomainSchema = Joi.object({
       }
       return value;
     }),
+  turnstile: Joi.string().required(),
 });
 
 const createSubdomainSchema = Joi.object({
