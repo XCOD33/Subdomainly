@@ -28,7 +28,7 @@ exports.addDnsRecord = async (zoneId, content, name, type, id) => {
       url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`,
       headers: {
         Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
       data: {
         content: content,
@@ -46,7 +46,8 @@ exports.addDnsRecord = async (zoneId, content, name, type, id) => {
 
     return response.data.result;
   } catch (error) {
-    console.error('Error in addDnsRecord:', error.message || error);
+    console.error('Error nih : ', console.error('Error Response Data:', error.response.data.errors))
+    // console.error('Error in addDnsRecord:', error.message || error);
     throw error; // Throw error untuk ditangkap di luar fungsi
   }
 };
@@ -65,6 +66,7 @@ exports.updateDnsRecord = async (zoneId, content = null, name = null, type = nul
       url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records/${id}`,
       headers: {
         Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+        'Content-Type': 'application/json',
       },
       data: body,
     });
@@ -87,6 +89,7 @@ exports.deleteDnsRecord = async (zoneId, id) => {
       url: `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records/${id}`,
       headers: {
         Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+        'Content-Type': 'application/json',
       },
     });
 

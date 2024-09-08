@@ -15,6 +15,7 @@ services:
       - DB_USER=postgres
       - DB_PASS=playa-epidural-artist-yucca-gurgle-gaining-aides-wires
       - DB_NAME=free-subdomain
+      - CLOUDFLARE_TURNSTILE_SECRET_KEY=0x4AAAAAAAi7B5bsHJ11H5YnD59yN1XkgeU
     env_file:
       - .env
     depends_on:

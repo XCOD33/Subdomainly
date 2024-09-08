@@ -9,7 +9,7 @@
     "deploy": "npx prisma migrate deploy",
     "dev": "npm run generate && nodemon server.js",
     "build": "npx prisma generate",
-    "start": "npx prisma generate && node server.js"
+    "start": "npx prisma generate && node --watch server.js"
   },
   "keywords": [],
   "author": "",
