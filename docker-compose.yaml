@@ -2,13 +2,14 @@ version: '3'
 
 services:
   web:
+    container_name: web
     build: .
     links:
       - db
     volumes:
       - .:/app
       - /app/node_modules
-      - /prisma
+      - ./prisma:/app/prisma
     environment:
       - DB_PORT=5432
       - DB_USER=postgres
@@ -23,6 +24,7 @@ services:
       - npm_network
 
   db:
+    container_name: db
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
@@ -34,6 +36,30 @@ services:
       - '5432'
     networks:
       - npm_network
+
+  prisma-studio:
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio:latest
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://postgres:playa-epidural-artist-yucca-gurgle-gaining-aides-wires@db:5432/free-subdomain
+      - POSTGRES_DATABASE=free-subdomain
+      - POSTGRES_HOST=db
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=playa-epidural-artist-yucca-gurgle-gaining-aides-wires
+      - POSTGRES_PORT=5432
+    ports:
+      - 5555:5555
+    depends_on:
+      - db
+    build:
+      context: prisma
+      dockerfile: Dockerfile
+    volumes:
+      - ./prisma:/app/prisma
+    networks:
+      - npm_network
+    
 
 networks:
   npm_network:
