@@ -172,7 +172,7 @@ exports.isSafeSubdomain = async (subdomain) => {
     await blockedNameModel.store(
       subdomain,
       responseJson.reason,
-      responseJson.status === 'safe' ? 'safe' : 'harmful'
+      responseJson.status === 'safe' ? 'safe' : 'suspicous'
     );
   }
 
