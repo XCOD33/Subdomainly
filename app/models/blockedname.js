@@ -2,25 +2,23 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.getAll = async () => {
-  const blockedNames = await prisma.blockedName.findMany();
-  return blockedNames;
+  return prisma.blockedName.findMany();
 };
 
 exports.isBlocked = async (name) => {
   try {
-    const blockedNames = await prisma.blockedName.findFirst({
+    return await prisma.blockedName.findFirst({
       where: {
         name,
+        status: 'harmful',
       },
     });
-
-    return blockedNames;
   } catch (error) {
     return error;
   }
 };
 
-exports.store = async (name, reason = null) => {
+exports.store = async (name, reason = null, status = null) => {
   try {
     const isBlocked = await this.isBlocked(name);
 
@@ -28,13 +26,13 @@ exports.store = async (name, reason = null) => {
       return;
     }
 
-    const blockedName = await prisma.blockedName.create({
+    return await prisma.blockedName.create({
       data: {
         name,
         reason,
+        status,
       },
     });
-    return blockedName;
   } catch (error) {
     return error;
   }

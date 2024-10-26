@@ -1,4 +1,5 @@
 const prisma = require('../models/subdomain');
+const blockedNameModel = require('../models/blockedname');
 const jwt = require('jsonwebtoken');
 const cloudflareHelper = require('../helpers/cloudflareHelper');
 const fonnteHelper = require('../helpers/fonnteHelper');
@@ -9,8 +10,7 @@ exports.search = async (req, res) => {
     const { name, turnstile } = req.body;
 
     const isSafeSubdomain = await geminiHelper.isSafeSubdomain(name);
-    console.log(isSafeSubdomain);
-    if (isSafeSubdomain.status !== 'SAFE') {
+    if (isSafeSubdomain.status !== 'safe') {
       throw new Error(`${isSafeSubdomain.reason}`);
     }
 

@@ -59,13 +59,13 @@ exports.isSafeSubdomain = async (subdomain) => {
         role: 'user',
         parts: [
           {
-            text: 'Kamu akan membantuku untuk menyeleksi apakah sebuah subdomain ini berbahaya atau tidak. Karena aku mengembangkan sistem untuk memberikan subdomain gratis, aku mau kamu mengecek subdomain ini ada unsur berbahaya atau tidak untuk dipakai orang lain. Misalnya :\nWWW, mail, smtp, pop, imap, slot, judi : itu berbahaya karena bisa dipakai oleh sembarang orang dan mengandung unsur kejahatan atau sejenisnya\n\nBerikan output persis seperti ini :\njika, berbahaya\n"BLOCKED: {subdomain} - {alasan}"\njika, tidak\n"SAFE"\n\nsubdomain : www',
+            text: 'Kamu akan membantuku untuk menyeleksi apakah sebuah subdomain ini berbahaya atau tidak. Karena aku mengembangkan sistem untuk memberikan subdomain gratis, aku mau kamu mengecek subdomain ini ada unsur berbahaya atau tidak untuk dipakai orang lain. Misalnya :\nWWW, mail, smtp, pop, imap, slot, judi : itu berbahaya karena bisa dipakai oleh sembarang orang dan mengandung unsur kejahatan atau sejenisnya\n\nBerikan output persis seperti ini :\njika, berbahaya\n"BLOCKED: {subdomain} - {alasan}"\njika, tidak\n"safe"\n\nsubdomain : www',
           },
         ],
       },
       {
         role: 'model',
-        parts: [{ text: '"SAFE" \n' }],
+        parts: [{ text: '"safe" \n' }],
       },
       {
         role: 'user',
@@ -92,7 +92,7 @@ exports.isSafeSubdomain = async (subdomain) => {
       },
       {
         role: 'model',
-        parts: [{ text: '"SAFE" \n' }],
+        parts: [{ text: '"safe" \n' }],
       },
       {
         role: 'user',
@@ -169,26 +169,7 @@ exports.isSafeSubdomain = async (subdomain) => {
 
   if (result.response.text().includes('BLOCKED')) {
     const responseJson = JSON.parse(result.response.text());
-
-    // const saveToDB = await blockedNameModel.store(subdomain, responseJson.reason || 'No reason');
-    // if (saveToDB) {
-    //   const message = `Name: ${subdomain}\nReason: ${responseJson.reason || 'No reason'}`;
-    //   await fonnteHelper.sendMessage(message);
-    // }
-
-    // encrypt name and reason to jwt
-    const secret = jwt.sign(
-      { name: subdomain, reason: responseJson.reason || 'No reason' },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRATION,
-      }
-    );
-
-    const message = `Name: ${subdomain}\nReason: ${
-      responseJson.reason || 'No reason'
-    }\nAdd to block list: ${process.env.BASE_URL}/api/block-name/add?secret=${secret}`;
-    await fonnteHelper.sendMessage(message);
+    await blockedNameModel.store(subdomain, responseJson.reason, responseJson.status === 'safe' ? 'safe' : 'harmful');
   }
 
   return JSON.parse(result.response.text());

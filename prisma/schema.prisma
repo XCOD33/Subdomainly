@@ -14,28 +14,35 @@ datasource db {
 }
 
 model Domain {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   domain    String
   zoneId    String
-  created   DateTime @default(now())
-  updated   DateTime @default(now())
+  created   DateTime    @default(now())
+  updated   DateTime    @default(now())
   Subdomain Subdomain[]
 }
 
 model Subdomain {
-  id        String   @id @default(cuid())
-  domain    Domain    @relation(fields: [domainId], references: [id])
-  domainId  String
-  type      String
-  name      String
-  content   String
-  securityCode String @unique
-  created   DateTime @default(now())
-  updated   DateTime @default(now())
+  id           String   @id @default(cuid())
+  domain       Domain   @relation(fields: [domainId], references: [id])
+  domainId     String
+  type         String
+  name         String
+  content      String
+  securityCode String   @unique
+  created      DateTime @default(now())
+  updated      DateTime @default(now())
+}
+
+enum StatusBlockedName {
+  safe
+  harmful
+  suspicious
 }
 
 model BlockedName {
-  id        String   @id @default(cuid())
-  name      String  @unique
-  reason    String  @default("No reason provided")
+  id     String            @id @default(cuid())
+  name   String            @unique
+  reason String            @default("No reason provided")
+  status StatusBlockedName @default(safe)
 }
