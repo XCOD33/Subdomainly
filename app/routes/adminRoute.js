@@ -5,6 +5,6 @@ const verifyJWT = require('../middleware/verifyJwt');
 
 router.get('/domain', verifyJWT, adminController.getAllDomain);
 router.post('/domain', verifyJWT, adminController.storeDomain);
-router.delete('/domain/:domain', verifyJWT, adminController.deleteDomain);
+router.post('/domain/:domain', verifyJWT, adminController.deleteDomain);
 
 module.exports = router;

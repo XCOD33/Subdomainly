@@ -55,7 +55,7 @@ exports.deleteDomain = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       success: false,
-      message: err.message,
+      message: `Internal server error: ${err.message}`,
     });
   }
 };
