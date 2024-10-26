@@ -7,4 +7,10 @@ router.get('/domain', verifyJWT, adminController.getAllDomain);
 router.post('/domain', verifyJWT, adminController.storeDomain);
 router.post('/domain/:domain', verifyJWT, adminController.deleteDomain);
 
+router.get('/subdomain', verifyJWT, adminController.getAllSubdomain);
+router.get('/subdomain/:subdomain', verifyJWT, adminController.getSubdomain);
+router.post('/subdomain', verifyJWT, adminController.storeSubdomain);
+router.post('/subdomain/:subdomain/update', verifyJWT, adminController.updateSubdomain);
+router.post('/subdomain/:subdomain/delete', verifyJWT, adminController.deleteSubdomain);
+
 module.exports = router;
