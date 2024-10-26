@@ -16,8 +16,8 @@ exports.listDnsRecords = async (zoneId) => {
     );
     return response.data.result;
   } catch (error) {
-    console.error(error);
-    throw error;
+    console.error(error.message || error);
+    throw error.message || error;
   }
 };
 
@@ -46,7 +46,10 @@ exports.addDnsRecord = async (zoneId, content, name, type, id) => {
 
     return response.data.result;
   } catch (error) {
-    console.error('Error nih : ', console.error('Error Response Data:', error.response.data.errors))
+    console.error(
+      'Error nih : ',
+      console.error('Error Response Data:', error.response.data.errors)
+    );
     // console.error('Error in addDnsRecord:', error.message || error);
     throw error; // Throw error untuk ditangkap di luar fungsi
   }

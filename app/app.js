@@ -3,6 +3,7 @@ const subdomainRoutes = require('./routes/subdomainRoute');
 const domainRoutes = require('./routes/domainRoute');
 const blockNameRoutes = require('./routes/blockNameRoute');
 const authRoutes = require('./routes/authRoute');
+const adminRoutes = require('./routes/adminRoute');
 const cors = require('cors');
 
 const app = express();
@@ -22,5 +23,6 @@ app.use('/api/subdomain', subdomainRoutes);
 app.use('/api/domain', domainRoutes);
 app.use('/api/block-name', blockNameRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 module.exports = app;
