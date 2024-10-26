@@ -169,7 +169,11 @@ exports.isSafeSubdomain = async (subdomain) => {
 
   if (result.response.text().includes('BLOCKED')) {
     const responseJson = JSON.parse(result.response.text());
-    await blockedNameModel.store(subdomain, responseJson.reason, responseJson.status === 'safe' ? 'safe' : 'harmful');
+    await blockedNameModel.store(
+      subdomain,
+      responseJson.reason,
+      responseJson.status === 'safe' ? 'safe' : 'harmful'
+    );
   }
 
   return JSON.parse(result.response.text());

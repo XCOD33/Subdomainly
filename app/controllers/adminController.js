@@ -162,3 +162,80 @@ exports.deleteSubdomain = async (req, res) => {
     });
   }
 };
+
+exports.getAllBlockedName = async (req, res) => {
+  try {
+    const blockNames = await prisma.blockedName.findMany();
+    res.status(200).json({
+      status: 'success',
+      data: blockNames,
+    });
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      message: `Internal server error: ${err.message}`,
+    });
+  }
+};
+
+exports.storeBlockedName = async (req, res) => {
+  try {
+    const { name, reason } = req.body;
+    const result = await prisma.blockedName.create({ data: { name, reason, status: 'harmful' } });
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: `Internal server error: ${err.message}`,
+    });
+  }
+};
+
+exports.updateBlockedName = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { reason, status } = req.body;
+    const result = await prisma.blockedName.findFirst({ where: { name } });
+    if (!result) {
+      throw new Error('Blocked name not found');
+    }
+    const newResult = await prisma.blockedName.update({
+      where: { name },
+      data: { reason, status },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: newResult,
+    });
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      message: `Internal server error: ${err.message}`,
+    });
+  }
+};
+
+exports.deleteBlockedName = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const result = await prisma.blockedName.findFirst({ where: { name } });
+    if (!result) {
+      throw new Error('Blocked name not found');
+    }
+    await prisma.blockedName.delete({ where: { name } });
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      message: `Internal server error: ${err.message}`,
+    });
+  }
+};
